@@ -1,0 +1,9 @@
+
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "outDir": "./dist",
+    "removeComments": true,
+    "sourceMap": true
+  }
+}
