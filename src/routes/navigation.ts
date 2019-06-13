@@ -8,7 +8,7 @@ import { MongoError, ObjectID } from 'mongodb';
 var navigation = Router();
 
 navigation.use((req:Request, res:Response, next:Function) => {
-  mongo.selectDb('blog');
+  // mongo.selectDb('blog');
   next();
 });
 
@@ -40,7 +40,7 @@ navigation.put('/', (req:any, res:Response) => {
     notEqual(req.body.href, undefined);
     notEqual(req.body.order, undefined);
 
-    const link = {
+    const link:Blog.Link = {
       title: req.body.title,
       href: req.body.href,
       order: req.body.order

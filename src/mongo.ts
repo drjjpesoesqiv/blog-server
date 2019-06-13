@@ -5,7 +5,7 @@ var client:MongoClient = null;
 var db:any = null;
 
 export default {
-  connect: (url:string) => {
+  connect: (url:string, database:string) => {
     if (client !== null)
       return;
 
@@ -15,6 +15,7 @@ export default {
 
     client.connect((err:MongoError) => {
       assert.equal(err, null);
+      db = client.db(database);
       console.log('connected to db');
     });
   },

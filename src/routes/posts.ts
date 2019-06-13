@@ -11,7 +11,7 @@ import * as slug from 'slug';
 var posts = Router();
 
 posts.use((req:Request, res:Response, next:Function) => {
-  mongo.selectDb('blog');
+  // mongo.selectDb('blog');
   next();
 });
 
@@ -78,7 +78,7 @@ posts.put('/', (req:any, res:Response) => {
     notEqual(req.body.title, undefined);
     notEqual(req.body.content, undefined);
 
-    var post = {
+    var post:Blog.Post = {
       author: req.session.username,
       title: req.body.title,
       niceTitle: slug(req.body.title.toLowerCase()),

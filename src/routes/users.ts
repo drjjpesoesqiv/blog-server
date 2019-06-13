@@ -9,7 +9,7 @@ import { MongoError, ObjectID } from 'mongodb';
 var users = Router();
 
 users.use((req:Request, res:Response, next:Function) => {
-  mongo.selectDb('blog');
+  // mongo.selectDb('blog');
   next();
 });
 
@@ -32,6 +32,7 @@ users.post('/login', (req:any, res:Response) => {
     mongo.collection('users').findOne({ username: req.body.username })
       .then((user:any) => {
         if (user && compareSync(req.body.password, user.password)) {
+          req.session._userId = user._id;
           req.session.role = user.role;
           req.session.username = user.username;
           res.status(200).send({ role: user.role, username: user.username });
@@ -99,7 +100,7 @@ users.put('/', (req:any, res:Response) => {
     notEqual(req.body.username, undefined);
     notEqual(req.body.password, undefined);
 
-    const user:any = {
+    const user:Blog.User = {
       role: req.body.role,
       email: req.body.email,
       username: req.body.username,
@@ -124,7 +125,7 @@ users.post('/update/:_id', (req:any, res:Response) => {
     notEqual(req.body.email, undefined);
     notEqual(req.body.username, undefined);
 
-    const user:any = {
+    var user:any = {
       role: req.body.role,
       email: req.body.email,
       username: req.body.username

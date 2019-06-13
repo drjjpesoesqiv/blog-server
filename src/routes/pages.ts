@@ -11,7 +11,7 @@ import * as slug from 'slug';
 var pages = Router();
 
 pages.use((req:Request, res:Response, next:Function) => {
-  mongo.selectDb('blog');
+  // mongo.selectDb('blog');
   next();
 });
 
@@ -78,7 +78,7 @@ pages.put('/', (req:any, res:Response) => {
     notEqual(req.body.title, undefined);
     notEqual(req.body.content, undefined);
 
-    var post = {
+    var page:Blog.Page = {
       author: req.session.username,
       title: req.body.title,
       niceTitle: slug(req.body.title.toLowerCase()),
@@ -86,7 +86,7 @@ pages.put('/', (req:any, res:Response) => {
       content: req.body.content
     };
 
-    mongo.collection('pages').insertOne(post)
+    mongo.collection('pages').insertOne(page)
       .then(() => {
         res.status(200).send();
       })
@@ -107,14 +107,14 @@ pages.post('/update/:_id', (req:any, res:Response) => {
     notEqual(req.body.date, undefined);
     notEqual(req.body.content, undefined);
 
-    var post = {
+    var page = {
       title: req.body.title,
       niceTitle: slug(req.body.title.toLowerCase()),
       date: req.body.date,
       content: req.body.content
     }
 
-    mongo.collection('pages').updateOne({ _id: new ObjectID( req.params._id )}, {$set: post})
+    mongo.collection('pages').updateOne({ _id: new ObjectID( req.params._id )}, {$set: page})
       .then(() => {
         res.status(200).send();
       })

@@ -5,8 +5,10 @@ const session = require('express-session');
 const cors = require('cors');
 
 import mongo from './mongo';
-mongo.connect('mongodb://127.0.0.1:27017');
+mongo.connect('mongodb://127.0.0.1:27017', 'blog');
 
+import installRoute from './routes/install';
+import commentsRoute from './routes/comments';
 import navigationRoute from './routes/navigation';
 import pagesRoute from './routes/pages';
 import postsRoute from './routes/posts';
@@ -26,6 +28,8 @@ app.use(session({
 
 app.use(express.json())
 
+app.use('/install', installRoute);
+app.use('/comments', commentsRoute);
 app.use('/navigation', navigationRoute);
 app.use('/pages', pagesRoute);
 app.use('/posts', postsRoute);
