@@ -4,8 +4,10 @@ import { Request, Response, Router } from 'express';
 import axios from 'axios';
 
 import mongo from '../mongo';
-import { MAIL_SERVICE_URL, ROLES, USERS } from '../config';
 import { MongoError, ObjectID } from 'mongodb';
+
+import { MAIL_SERVICE_URL, ROLES, USERS } from '../config';
+import { REGISTRATION_EMAIL } from '../locale.json';
 
 import * as qs from 'querystring';
 
@@ -110,8 +112,8 @@ users.post('/register', (req:Request, res:Response, next:Function) => {
       .then(() => {
         axios.post(MAIL_SERVICE_URL, qs.stringify({
           to: req.body.email,
-          subject: "Registration",
-          message: "You are registered"
+          subject: REGISTRATION_EMAIL.SUBJECT,
+          message: REGISTRATION_EMAIL.MESSAGE
         }),{
           headers: {
             'Content-Type': "application/x-www-form-urlencoded"

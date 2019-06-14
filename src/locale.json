@@ -1,0 +1,6 @@
+{
+  "REGISTRATION_EMAIL": {
+    "SUBJECT": "Registration",
+    "MESSAGE": "Congratulations, you are registered."
+  }
+}
