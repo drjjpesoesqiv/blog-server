@@ -1,3 +1,5 @@
+export const MAIL_SERVICE_URL = "http://localhost:8080"
+
 export const ROLES = {
   ADMIN: 1,
   GENERIC: 2

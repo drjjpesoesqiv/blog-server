@@ -1,10 +1,13 @@
 import { AssertionError, notEqual } from 'assert';
 import { compareSync, hashSync } from 'bcrypt';
 import { Request, Response, Router } from 'express';
+import axios from 'axios';
 
 import mongo from '../mongo';
-import { ROLES, USERS } from '../config';
+import { MAIL_SERVICE_URL, ROLES, USERS } from '../config';
 import { MongoError, ObjectID } from 'mongodb';
+
+import * as qs from 'querystring';
 
 var users = Router();
 
@@ -87,6 +90,39 @@ users.get('/:_id', (req:Request, res:Response) => {
       .catch(() => res.status(500).send());
   } catch(err) {
     res.status(500).send();
+  }
+});
+
+users.post('/register', (req:Request, res:Response, next:Function) => {
+  try {
+    notEqual(req.body.email, undefined);
+    notEqual(req.body.username, undefined);
+    notEqual(req.body.password, undefined);
+
+    const user:Blog.User = {
+      role: ROLES.GENERIC,
+      email: req.body.email,
+      username: req.body.username,
+      password: hashSync(req.body.password, 10)
+    };
+
+    mongo.collection('users').insertOne(user)
+      .then(() => {
+        axios.post(MAIL_SERVICE_URL, qs.stringify({
+          to: req.body.email,
+          subject: "Registration",
+          message: "You are registered"
+        }),{
+          headers: {
+            'Content-Type': "application/x-www-form-urlencoded"
+          }
+        });
+        res.status(200).send()
+      })
+      .catch(() => res.status(500).send() );
+  } catch(err) {
+    if (err instanceof AssertionError)
+      res.status(400).send();
   }
 });
 
