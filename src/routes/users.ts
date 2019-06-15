@@ -95,7 +95,7 @@ users.get('/:_id', (req:Request, res:Response) => {
   }
 });
 
-users.post('/register', (req:Request, res:Response, next:Function) => {
+users.post('/register', (req:any, res:Response, next:Function) => {
   try {
     notEqual(req.body.email, undefined);
     notEqual(req.body.username, undefined);
@@ -109,7 +109,7 @@ users.post('/register', (req:Request, res:Response, next:Function) => {
     };
 
     mongo.collection('users').insertOne(user)
-      .then(() => {
+      .then((outcome:any) => {
         axios.post(MAIL_SERVICE_URL, qs.stringify({
           to: req.body.email,
           subject: REGISTRATION_EMAIL.SUBJECT,
@@ -119,7 +119,15 @@ users.post('/register', (req:Request, res:Response, next:Function) => {
             'Content-Type': "application/x-www-form-urlencoded"
           }
         });
-        res.status(200).send()
+
+        req.session._userId = outcome.ops[0]._id;
+        req.session.role = ROLES.GENERIC;
+        req.session.username = req.body.username;
+        
+        res.status(200).send({
+          role: req.session.role,
+          username: req.session.username
+        })
       })
       .catch(() => res.status(500).send() );
   } catch(err) {
