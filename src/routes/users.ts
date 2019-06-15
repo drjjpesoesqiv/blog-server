@@ -18,6 +18,20 @@ users.use((req:Request, res:Response, next:Function) => {
   next();
 });
 
+users.get('/hydrate', (req:any, res:Response) => {
+  try {
+    if ( ! req.session.username)
+      return res.status(200).send();
+    
+    return res.status(200).send({
+      role: req.session.role,
+      username: req.session.username
+    })
+  } catch(err) {
+    res.status(500).send();
+  }
+});
+
 users.get('/count', (req:Request, res:Response) => {
   try {
     mongo.collection('users').count((err:MongoError,count:number) => {
