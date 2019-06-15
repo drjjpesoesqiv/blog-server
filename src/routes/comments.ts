@@ -7,9 +7,9 @@ import { ROLES } from '../config';
 
 var comments = Router();
 
-comments.get('/:_id', (req:Request, res:Response) => {
+comments.get('/:_postId', (req:Request, res:Response) => {
   try {
-    mongo.collection('comments').find().toArray()
+    mongo.collection('comments').find({ _postId: req.params._postId }).toArray()
       .then((docs:any) => {
         res.status(200).send(docs);
       })
