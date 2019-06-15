@@ -1,15 +1,14 @@
 import { AssertionError, notEqual } from 'assert';
 import { compareSync, hashSync } from 'bcrypt';
 import { Request, Response, Router } from 'express';
-import axios from 'axios';
 
 import mongo from '../mongo';
 import { MongoError, ObjectID } from 'mongodb';
 
-import { MAIL_SERVICE_URL, ROLES, USERS } from '../config';
-import { REGISTRATION_EMAIL } from '../locale.json';
+import MailService from '../lib/MailService';
 
-import * as qs from 'querystring';
+import { ROLES, USERS } from '../config';
+import { REGISTRATION_EMAIL } from '../locale.json';
 
 var users = Router();
 
@@ -115,35 +114,41 @@ users.post('/register', (req:any, res:Response, next:Function) => {
     notEqual(req.body.username, undefined);
     notEqual(req.body.password, undefined);
 
-    const user:Blog.User = {
-      role: ROLES.GENERIC,
-      email: req.body.email,
-      username: req.body.username,
-      password: hashSync(req.body.password, 10)
-    };
-
-    mongo.collection('users').insertOne(user)
-      .then((outcome:any) => {
-        axios.post(MAIL_SERVICE_URL, qs.stringify({
-          to: req.body.email,
-          subject: REGISTRATION_EMAIL.SUBJECT,
-          message: REGISTRATION_EMAIL.MESSAGE
-        }),{
-          headers: {
-            'Content-Type': "application/x-www-form-urlencoded"
-          }
-        });
-
-        req.session._userId = outcome.ops[0]._id;
-        req.session.role = ROLES.GENERIC;
-        req.session.username = req.body.username;
+    mongo.collection('users').findOne({ username: req.body.username })
+      .then((userExists:any) => {
+        if (userExists)
+          return res.status(400).send('Account with that username exists');
         
-        res.status(200).send({
-          role: req.session.role,
-          username: req.session.username
-        })
+        const user:Blog.User = {
+          role: ROLES.GENERIC,
+          email: req.body.email,
+          username: req.body.username,
+          password: hashSync(req.body.password, 10)
+        };
+      
+        mongo.collection('users').insertOne(user)
+          .then((outcome:any) => {
+            try {
+              new MailService({
+                to: req.body.email,
+                subject: REGISTRATION_EMAIL.SUBJECT,
+                message: REGISTRATION_EMAIL.MESSAGE
+              }).send();
+            } catch (err) {
+              console.log(err);
+            }
+      
+            req.session._userId = outcome.ops[0]._id;
+            req.session.role = ROLES.GENERIC;
+            req.session.username = req.body.username;
+            
+            res.status(200).send({
+              role: req.session.role,
+              username: req.session.username
+            })
+          })
+          .catch(() => res.status(500).send() );
       })
-      .catch(() => res.status(500).send() );
   } catch(err) {
     if (err instanceof AssertionError)
       res.status(400).send();
