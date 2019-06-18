@@ -35,9 +35,9 @@ app.use((req:any, res:any, next:Function) => {
   const throttleKey = `${req.ip}-throttle`;
   redisClient.get(throttleKey, (err:Error, value:any) => {
     redisClient.incr(throttleKey);
-    if (value > 10)
+    if (value > 20)
       return res.status(500).send();
-    redisClient.expire(throttleKey, 10);
+    redisClient.expire(throttleKey, 5);
     next();
   });
 });
