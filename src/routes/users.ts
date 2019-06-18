@@ -93,14 +93,27 @@ users.get('/page/:page', (req:Request, res:Response) => {
   }
 });
 
-users.get('/:_id', (req:Request, res:Response) => {
+users.get('/:_id', (req:any, res:Response) => {
   try {
+    if (req.session.role != ROLES.ADMIN)
+      return res.status(403).send();
+
     mongo.collection('users').findOne({ _id: new ObjectID(req.params._id) })
       .then((user:any) => {
         if ( ! user)
           return res.status(404).send();
-        user['password'] = '';
-        res.status(200).send(user);
+
+        mongo.collection('api').findOne({ _userId: user._id.toString(), active: 1 })
+          .then((access:any) => {
+            if (access)
+              user['apiKey'] = access.key;
+            user['password'] = '';
+            res.status(200).send(user);
+          })
+          .catch((err:Error) => {
+            console.log(err);
+            res.status(500).send();
+          })
       })
       .catch(() => res.status(500).send());
   } catch(err) {
