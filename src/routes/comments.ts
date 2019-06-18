@@ -10,10 +10,27 @@ var comments = Router();
 comments.get('/:_postId', (req:Request, res:Response) => {
   try {
     mongo.collection('comments').find({ _postId: req.params._postId }).toArray()
-      .then((docs:any) => {
-        res.status(200).send(docs);
+      .then((comments:any) => {
+        var _ids = [];
+        comments.forEach((comment:any) => {
+          _ids.push(new ObjectID(comment._authorId));
+        });
+        mongo.collection('users').find({ _id: { $in: _ids }}, { username: 1 }).toArray()
+          .then((users:any) => {
+            for (var c in comments)
+              users.forEach((user:any) => {
+                if (comments[c]._authorId == user._id)
+                  comments[c]['username'] = user.username;
+              });
+            res.status(200).send(comments);
+          })
+          .catch((err:Error) => {
+            console.log(err);
+            res.status(500).send();
+          })
       })
-      .catch(() => {
+      .catch((err:Error) => {
+        console.log(err);
         res.status(500).send();
       })
   } catch(err) {
