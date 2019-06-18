@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 
+import * as redis from 'redis';
 import mongo from './mongo';
 mongo.connect('mongodb://127.0.0.1:27017', 'blog');
 
@@ -28,6 +29,18 @@ app.use(session({
 }));
 
 app.use(express.json())
+
+var redisClient = redis.createClient(6379, '127.0.0.1');
+app.use((req:any, res:any, next:Function) => {
+  const throttleKey = `${req.ip}-throttle`;
+  redisClient.get(throttleKey, (err:Error, value:any) => {
+    redisClient.incr(throttleKey);
+    if (value > 5)
+      return res.status(500).send();
+    redisClient.expire(throttleKey, 10);
+    next();
+  });
+});
 
 app.use('/install', installRoute);
 app.use('/api', apiRoute);
