@@ -4,13 +4,13 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 
-import * as redis from 'redis';
 import mongo from './mongo';
 mongo.connect('mongodb://127.0.0.1:27017', 'blog');
 
 import installRoute from './routes/install';
 import apiRoute from './routes/api';
 import commentsRoute from './routes/comments';
+import linksRoute from './routes/links';
 import navigationRoute from './routes/navigation';
 import pagesRoute from './routes/pages';
 import postsRoute from './routes/posts';
@@ -30,21 +30,10 @@ app.use(session({
 
 app.use(express.json())
 
-var redisClient = redis.createClient(6379, '127.0.0.1');
-app.use((req:any, res:any, next:Function) => {
-  const throttleKey = `${req.ip}-throttle`;
-  redisClient.get(throttleKey, (err:Error, value:any) => {
-    redisClient.incr(throttleKey);
-    if (value > 20)
-      return res.status(500).send();
-    redisClient.expire(throttleKey, 5);
-    next();
-  });
-});
-
 app.use('/install', installRoute);
 app.use('/api', apiRoute);
 app.use('/comments', commentsRoute);
+app.use('/links', linksRoute);
 app.use('/navigation', navigationRoute);
 app.use('/pages', pagesRoute);
 app.use('/posts', postsRoute);
