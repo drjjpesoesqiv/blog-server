@@ -5,7 +5,12 @@ const session = require('express-session');
 const cors = require('cors');
 
 import mongo from './mongo';
-mongo.connect('mongodb://127.0.0.1:27017', 'blog');
+
+const { MONGO_USER, MONGO_PASS } = process.env;
+const mongoUrl = (process.argv[3] != 'dev')
+  ? `${MONGO_USER}:${MONGO_PASS}@mongo`
+  : '127.0.0.1';
+mongo.connect(`mongodb://${mongoUrl}:27017`, 'blog');
 
 import installRoute from './routes/install';
 import apiRoute from './routes/api';
