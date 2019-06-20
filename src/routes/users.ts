@@ -206,7 +206,8 @@ users.post('/update/:_id', (req:any, res:Response) => {
     var user:any = {
       role: req.body.role,
       email: req.body.email,
-      username: req.body.username
+      username: req.body.username,
+      permissions: req.body.permissions || {}
     };
 
     if (req.body.password)
