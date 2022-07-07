@@ -21,7 +21,7 @@
     "crypto": "^1.0.1",
     "express": "^4.17.1",
     "express-session": "^1.16.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mongodb": "^3.2.6",
     "redis": "^2.8.0",
     "slug": "^1.1.0",
